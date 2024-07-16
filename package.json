@@ -1,5 +1,5 @@
 {
-  "name": "database",
+  "name": "@sbs9642p/database",
   "version": "1.0.0",
   "description": "",
   "main": "index.mjs",
@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@turf/distance": "^7.0.0",
     "lokijs": "^1.5.12",
     "mongodb": "^6.8.0"
   },
