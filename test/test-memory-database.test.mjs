@@ -152,4 +152,39 @@ describe('The in memory database', () => {
       { _id: { mode: 'metro', name: 'Nunawading Station' } }
     ])
   })
+
+  it('Allow mongodb style matching of array items with $elemMatch', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocuments([{
+      name: 'Huntingdale',
+      bays: [{
+        mode: 'bus',
+        stopGTFSID: '51587',
+        sub: { tram: true }
+      }, {
+        mode: 'metro',
+        stopGTFSID: '123'
+      }]
+    }, {
+      name: 'Monash',
+      bays: [{
+        mode: 'bus',
+        stopGTFSID: '19810'
+      }]
+    }])
+
+    let data = await coll.findDocuments({
+      bays: {
+        $elemMatch: {
+          mode: 'bus',
+          stopGTFSID: '51587',
+          'sub.tram': true
+        }
+      }
+    }).toArray()
+
+    expect(data[0].name).to.equal('Huntingdale')
+  })
 })
