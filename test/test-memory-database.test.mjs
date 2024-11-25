@@ -168,6 +168,16 @@ describe('The in memory database', () => {
         stopGTFSID: '123'
       }]
     }, {
+      name: 'Huntingdale 2',
+      bays: [{
+        mode: 'bus',
+        stopGTFSID: '51587',
+        sub: { tram: false }
+      }, {
+        mode: 'metro',
+        stopGTFSID: '123'
+      }]
+    }, {
       name: 'Monash',
       bays: [{
         mode: 'bus',
@@ -185,6 +195,7 @@ describe('The in memory database', () => {
       }
     }).toArray()
 
+    expect(data.length).to.equal(1)
     expect(data[0].name).to.equal('Huntingdale')
   })
 })
