@@ -47,4 +47,31 @@ describe('The in memory database', () => {
     expect(stop).to.not.be.null
     expect(stop.stopName).to.equal('Dole Avenue/Cheddar Road')
   })
+
+  it('Should find distinct fields based on a query', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocuments([{
+      mode: 'bus',
+      stopName: "Dole Avenue/Cheddar Road"
+    }, {
+      mode: 'bus',
+      stopName: "Huntingdale Station"
+    }, {
+      mode: 'bus',
+      stopName: "Oakleigh Station"
+    }, {
+      mode: 'metro',
+      stopName: "Nunawading Station"
+    }])
+
+    expect(await coll.distinct('stopName', { mode: 'bus' })).to.have.members([
+      'Dole Avenue/Cheddar Road',
+      'Huntingdale Station',
+      'Oakleigh Station'
+    ])
+
+    expect(await coll.distinct('_id').length).to.equal(4)
+  })
 })
