@@ -143,7 +143,7 @@ describe('The in memory database', () => {
           }
         }
       }
-    ])
+    ]).toArray()
 
     expect(data).to.deep.equal([
       { _id: { mode: 'bus', name: 'Dole Avenue/Cheddar Road' } },
