@@ -101,4 +101,55 @@ describe('The in memory database', () => {
 
     expect(coll.findDocument({ stopName: "Dole Avenue/Cheddar Road" }).mode).to.equal('tram')
   })
+
+  it('Allow mongodb style aggregation with a very simple 2 stage pipeline only', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocuments([{
+      mode: 'bus',
+      stopName: "Dole Avenue/Cheddar Road",
+      id: 0
+    }, {
+      mode: 'bus',
+      stopName: "Huntingdale Station",
+      id: 1
+    }, {
+      mode: 'bus',
+      stopName: "Huntingdale Station",
+      id: 2
+    }, {
+      mode: 'bus',
+      stopName: "Huntingdale Station",
+      id: 3
+    }, {
+      mode: 'bus',
+      stopName: "Oakleigh Station",
+      id: 4
+    }, {
+      mode: 'metro',
+      stopName: "Nunawading Station",
+      id: 5
+    }])
+
+    let data = await coll.aggregate([
+      {
+        $match: {}
+      }, {
+        $group: {
+          _id: {
+            mode: '$mode',
+            name: '$stopName'
+          }
+        }
+      }
+    ])
+
+    expect(data).to.deep.equal([
+      { _id: { mode: 'bus', name: 'Dole Avenue/Cheddar Road' } },
+      { _id: { mode: 'bus', name: 'Huntingdale Station' } },
+      { _id: { mode: 'bus', name: 'Oakleigh Station' } },
+      { _id: { mode: 'metro', name: 'Nunawading Station' } }
+    ])
+  })
 })
