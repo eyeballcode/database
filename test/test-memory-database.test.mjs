@@ -74,4 +74,31 @@ describe('The in memory database', () => {
 
     expect(await coll.distinct('_id').length).to.equal(4)
   })
+
+  it('Allow mongodb style updating', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocuments([{
+      mode: 'bus',
+      stopName: "Dole Avenue/Cheddar Road"
+    }, {
+      mode: 'bus',
+      stopName: "Huntingdale Station"
+    }, {
+      mode: 'bus',
+      stopName: "Oakleigh Station"
+    }, {
+      mode: 'metro',
+      stopName: "Nunawading Station"
+    }])
+
+    await coll.updateDocument({
+      stopName: "Dole Avenue/Cheddar Road"
+    }, {
+      $set: { mode: 'tram' }
+    })
+
+    expect(coll.findDocument({ stopName: "Dole Avenue/Cheddar Road" }).mode).to.equal('tram')
+  })
 })
