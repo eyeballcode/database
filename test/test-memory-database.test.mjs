@@ -153,6 +153,30 @@ describe('The in memory database', () => {
     ])
   })
 
+  it('Should allow aggregation to sort by count', async () => {
+    let data = []
+    for (let i = 0; i < 20; i++) data.push({ name: 'Thomastown', index: Math.random() })
+    for (let i = 0; i < 25; i++) data.push({ name: 'Lalor', index: Math.random() })
+
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocuments(data.sort((a, b) => a.index - b.index))
+
+    let counts = await coll.aggregate([
+      {
+        $match: {}
+      }, {
+        $sortByCount: '$name'
+      }
+    ]).toArray()
+
+    expect(counts).to.deep.equal([
+      { _id: 'Lalor', count: 25 },
+      { _id: 'Thomastown', count: 20 }
+    ])
+  })
+
   it('Allow mongodb style matching of array items with $elemMatch', async () => {
     let db = new LokiDatabaseConnection('test-db')
 
