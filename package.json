@@ -1,6 +1,6 @@
 {
-  "name": "@sbs9642p/database",
-  "version": "1.0.9",
+  "name": "@transportme/database",
+  "version": "1.0.10",
   "description": "",
   "main": "index.mjs",
   "scripts": {
