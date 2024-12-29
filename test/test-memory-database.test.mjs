@@ -222,4 +222,94 @@ describe('The in memory database', () => {
     expect(data.length).to.equal(1)
     expect(data[0].name).to.equal('Huntingdale')
   })
+
+  it('Should allow document deletion', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocument({
+      mode: 'bus',
+      stopName: "Dole Avenue/Cheddar Road",
+      id: 0
+    })
+
+    await coll.deleteDocument({ id: 0 })
+
+    expect(await coll.findDocument({ id: 0 })).to.be.null
+  })
+
+  it('Should allow document replacement', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocument({
+      mode: 'bus',
+      stopName: "Dole Avenue/Cheddar Road",
+      id: 0
+    })
+
+    await coll.replaceDocument({ id: 0 }, {
+      newMode: 'tram',
+      newID: 1
+    })
+
+    expect(await coll.findDocument({ id: 0 })).to.be.null
+    let replacement = await coll.findDocument({ newID: 1 })
+    expect(replacement.newMode).to.equal('tram')
+    expect(replacement.newID).to.equal(1)
+    expect(replacement.stopName).to.be.undefined
+  })
+
+  it('Should allow bulk inserts', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.bulkWrite([{ insertOne: { name: 'Hi' } }])
+    expect(await coll.findDocument({ name: 'Hi' })).to.exist
+  })
+
+  it('Should allow bulk updates', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocuments([{
+      mode: 'bus',
+      stopName: "Dole Avenue/Cheddar Road",
+      id: 0
+    }, {
+      mode: 'bus',
+      stopName: "Huntingdale Station",
+      id: 1
+    }, {
+      mode: 'bus',
+      stopName: "Huntingdale Station",
+      id: 2
+    }, {
+      mode: 'bus',
+      stopName: "Huntingdale Station",
+      id: 3
+    }, {
+      mode: 'bus',
+      stopName: "Oakleigh Station",
+      id: 4
+    }, {
+      mode: 'metro',
+      stopName: "Nunawading Station",
+      id: 5
+    }])
+
+    await coll.bulkWrite([{
+      updateOne: {
+        filter: { id: 2 },
+        update: { $set: { name: 'Test' } }
+      }
+    }, {
+      updateOne: {
+        filter: { id: 5 },
+        update: { $set: { name: 'Test 2' } }
+      }
+    }])
+    expect((await coll.findDocument({ id: 2 })).name).to.equal('Test')
+    expect((await coll.findDocument({ id: 5 })).name).to.equal('Test 2')
+  })
 })
