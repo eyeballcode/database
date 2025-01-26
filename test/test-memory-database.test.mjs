@@ -48,6 +48,33 @@ describe('The in memory database', () => {
     expect(stop.stopName).to.equal('Dole Avenue/Cheddar Road')
   })
 
+  it('Should ensure maxDistance is in metres', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocument({
+      "stopName": "Dole Avenue/Cheddar Road",
+      "location": {
+        "type": "MultiPoint",
+        "coordinates": [[ 145.436193608845, -38.4376225731191 ]]
+      }
+    })
+
+    let stop = await coll.findDocument({
+      location: {
+        $nearSphere: {
+          $geometry: {
+            "type": "Point",
+            "coordinates": [ 145.018954051418, -37.7007758062827 ]
+          },
+          $maxDistance: 500
+        }
+      }
+    })
+
+    expect(stop).to.be.null
+  })
+
   it('Should find distinct fields based on a query', async () => {
     let db = new LokiDatabaseConnection('test-db')
 
