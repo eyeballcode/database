@@ -1,6 +1,32 @@
 import { expect } from 'chai'
 import LokiDatabaseConnection from '../lib/loki/LokiDatabaseConnection.mjs'
 
+const aggData = [{
+  mode: 'bus',
+  stopName: "Dole Avenue/Cheddar Road",
+  id: 0
+}, {
+  mode: 'bus',
+  stopName: "Huntingdale Station",
+  id: 1
+}, {
+  mode: 'bus',
+  stopName: "Huntingdale Station",
+  id: 2
+}, {
+  mode: 'bus',
+  stopName: "Huntingdale Station",
+  id: 3
+}, {
+  mode: 'bus',
+  stopName: "Oakleigh Station",
+  id: 4
+}, {
+  mode: 'metro',
+  stopName: "Nunawading Station",
+  id: 5
+}]
+
 describe('The in memory database', () => {
   it('Should create a new collection that can store items', async () => {
     let db = new LokiDatabaseConnection('test-db')
@@ -133,31 +159,7 @@ describe('The in memory database', () => {
     let db = new LokiDatabaseConnection('test-db')
 
     let coll = await db.createCollection('test-coll')
-    await coll.createDocuments([{
-      mode: 'bus',
-      stopName: "Dole Avenue/Cheddar Road",
-      id: 0
-    }, {
-      mode: 'bus',
-      stopName: "Huntingdale Station",
-      id: 1
-    }, {
-      mode: 'bus',
-      stopName: "Huntingdale Station",
-      id: 2
-    }, {
-      mode: 'bus',
-      stopName: "Huntingdale Station",
-      id: 3
-    }, {
-      mode: 'bus',
-      stopName: "Oakleigh Station",
-      id: 4
-    }, {
-      mode: 'metro',
-      stopName: "Nunawading Station",
-      id: 5
-    }])
+    await coll.createDocuments(JSON.parse(JSON.stringify(aggData)))
 
     let data = await coll.aggregate([
       {
@@ -338,5 +340,16 @@ describe('The in memory database', () => {
     }])
     expect((await coll.findDocument({ id: 2 })).name).to.equal('Test')
     expect((await coll.findDocument({ id: 5 })).name).to.equal('Test 2')
+  })
+
+  it('Should count by using find and returning the length', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocuments(JSON.parse(JSON.stringify(aggData)))
+
+    expect(await coll.countDocuments({})).to.equal(aggData.length)
+    expect(await coll.countDocuments({ stopName: /Huntingdale/ }))
+      .to.equal(aggData.filter(s => s.stopName.includes('Huntingdale')).length)
   })
 })
