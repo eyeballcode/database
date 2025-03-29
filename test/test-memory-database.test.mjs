@@ -407,10 +407,28 @@ describe('The in memory database', () => {
   })
 
   describe('The _fieldMatches function', () => {
+    it('Should return a trivial comparison if no $ operators are given', () => {
+      expect(LokiDatabaseCollection._fieldMatches('51587', '51587')).to.be.true
+    })
+
     it('Should check for $in', () => {
       expect(LokiDatabaseCollection._fieldMatches('51587', { $in: ['51587'] })).to.be.true
       expect(LokiDatabaseCollection._fieldMatches('51586', { $in: ['51587'] })).to.be.false
       expect(LokiDatabaseCollection._fieldMatches('51586', { $in: ['51586', '51587'] })).to.be.true
+    })
+
+    it('Should check for $gt/$gte', () => {
+      expect(LokiDatabaseCollection._fieldMatches(15, { $gt: 13 })).to.be.true
+      expect(LokiDatabaseCollection._fieldMatches(10, { $gt: 13 })).to.be.false
+      expect(LokiDatabaseCollection._fieldMatches(13, { $gt: 13 })).to.be.false
+      expect(LokiDatabaseCollection._fieldMatches(13, { $gte: 13 })).to.be.true
+    })
+
+    it('Should check for $lt/$lte', () => {
+      expect(LokiDatabaseCollection._fieldMatches(15, { $lt: 13 })).to.be.false
+      expect(LokiDatabaseCollection._fieldMatches(10, { $lt: 13 })).to.be.true
+      expect(LokiDatabaseCollection._fieldMatches(13, { $lt: 13 })).to.be.false
+      expect(LokiDatabaseCollection._fieldMatches(13, { $lte: 13 })).to.be.true
     })
   })
 })
