@@ -430,5 +430,10 @@ describe('The in memory database', () => {
       expect(LokiDatabaseCollection._fieldMatches(13, { $lt: 13 })).to.be.false
       expect(LokiDatabaseCollection._fieldMatches(13, { $lte: 13 })).to.be.true
     })
+
+    it('Should allow chaining multiple operators', () => {
+      expect(LokiDatabaseCollection._fieldMatches(15, { $gte: 13, $lte: 17 })).to.be.true
+      expect(LokiDatabaseCollection._fieldMatches(20, { $gte: 13, $lte: 17 })).to.be.false
+    })
   })
 })
