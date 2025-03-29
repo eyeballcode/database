@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import LokiDatabaseConnection from '../lib/loki/LokiDatabaseConnection.mjs'
+import LokiDatabaseCollection from '../lib/loki/LokiDatabaseCollection.mjs'
 
 const aggData = [{
   mode: 'bus',
@@ -252,6 +253,58 @@ describe('The in memory database', () => {
     expect(data[0].name).to.equal('Huntingdale')
   })
 
+  it('Should ensure $elemMatch respects $in/$gte/other checks', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocuments([{
+      name: 'Huntingdale 1',
+      bays: [{
+        mode: 'bus',
+        stopGTFSID: '51587',
+        sub: { count: 4 }
+      }, {
+        mode: 'metro',
+        stopGTFSID: '123'
+      }]
+    }, {
+      name: 'Huntingdale 2',
+      bays: [{
+        mode: 'bus',
+        stopGTFSID: '51587',
+        sub: { count: 10 }
+      }, {
+        mode: 'metro',
+        stopGTFSID: '123'
+      }]
+    }, {
+      name: 'Huntingdale 3',
+      bays: [{
+        mode: 'bus',
+        stopGTFSID: '999',
+        sub: { count: 4 }
+      }, {
+        mode: 'metro',
+        stopGTFSID: '123'
+      }]
+    }])
+
+    let data = await coll.findDocuments({
+      bays: {
+        $elemMatch: {
+          stopGTFSID: { $in: [ '51587' ] },
+          'sub.tram': {
+            $gte: 3,
+            $lte: 5
+          }
+        }
+      }
+    }).toArray()
+
+    expect(data.length).to.equal(1)
+    expect(data[0].name).to.equal('Huntingdale 1')
+  })
+
   it('Should allow document deletion', async () => {
     let db = new LokiDatabaseConnection('test-db')
 
@@ -351,5 +404,13 @@ describe('The in memory database', () => {
     expect(await coll.countDocuments({})).to.equal(aggData.length)
     expect(await coll.countDocuments({ stopName: /Huntingdale/ }))
       .to.equal(aggData.filter(s => s.stopName.includes('Huntingdale')).length)
+  })
+
+  describe('The _fieldMatches function', () => {
+    it('Should check for $in', () => {
+      expect(LokiDatabaseCollection._fieldMatches('51587', { $in: ['51587'] })).to.be.true
+      expect(LokiDatabaseCollection._fieldMatches('51586', { $in: ['51587'] })).to.be.false
+      expect(LokiDatabaseCollection._fieldMatches('51586', { $in: ['51586', '51587'] })).to.be.true
+    })
   })
 })
