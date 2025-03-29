@@ -406,6 +406,18 @@ describe('The in memory database', () => {
       .to.equal(aggData.filter(s => s.stopName.includes('Huntingdale')).length)
   })
 
+  it('Should match arrays by their contents', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    let days = ['Mon', 'Tue', 'Wed', 'Thu']
+    await coll.createDocument({
+      days
+    })
+
+    expect(await coll.findDocument({ days: 'Mon' })).to.exist
+  })
+
   describe('The _fieldMatches function', () => {
     it('Should return a trivial comparison if no $ operators are given', () => {
       expect(LokiDatabaseCollection._fieldMatches('51587', '51587')).to.be.true
@@ -434,6 +446,11 @@ describe('The in memory database', () => {
     it('Should allow chaining multiple operators', () => {
       expect(LokiDatabaseCollection._fieldMatches(15, { $gte: 13, $lte: 17 })).to.be.true
       expect(LokiDatabaseCollection._fieldMatches(20, { $gte: 13, $lte: 17 })).to.be.false
+    })
+
+    it('Should allow matching array contents', () => {
+      expect(LokiDatabaseCollection._fieldMatches([20, 21], 20)).to.be.true
+      expect(LokiDatabaseCollection._fieldMatches([19, 21], 20)).to.be.false
     })
   })
 })
