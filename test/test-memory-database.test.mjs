@@ -293,7 +293,7 @@ describe('The in memory database', () => {
       bays: {
         $elemMatch: {
           stopGTFSID: { $in: [ '51587' ] },
-          'sub.tram': {
+          'sub.count': {
             $gte: 3,
             $lte: 5
           }
