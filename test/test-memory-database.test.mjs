@@ -423,6 +423,11 @@ describe('The in memory database', () => {
       expect(LokiDatabaseCollection._fieldMatches('51587', '51587')).to.be.true
     })
 
+    it('Should check for $ne', () => {
+      expect(LokiDatabaseCollection._fieldMatches('51587', { $ne: '51587' })).to.be.false
+      expect(LokiDatabaseCollection._fieldMatches('51586', { $ne: '51587' })).to.be.true
+    })
+
     it('Should check for $in', () => {
       expect(LokiDatabaseCollection._fieldMatches('51587', { $in: ['51587'] })).to.be.true
       expect(LokiDatabaseCollection._fieldMatches('51586', { $in: ['51587'] })).to.be.false
