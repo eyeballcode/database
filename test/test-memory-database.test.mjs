@@ -207,7 +207,7 @@ describe('The in memory database', () => {
     ])
   })
 
-  it('Allow mongodb style matching of array items with $elemMatch', async () => {
+  it('Should allow mongodb style matching of array items with $elemMatch', async () => {
     let db = new LokiDatabaseConnection('test-db')
 
     let coll = await db.createCollection('test-coll')
@@ -239,7 +239,7 @@ describe('The in memory database', () => {
       }]
     }])
 
-    let data = await coll.findDocuments({
+    let test1 = await coll.findDocuments({
       bays: {
         $elemMatch: {
           mode: 'bus',
@@ -249,8 +249,21 @@ describe('The in memory database', () => {
       }
     }).toArray()
 
-    expect(data.length).to.equal(1)
-    expect(data[0].name).to.equal('Huntingdale')
+    expect(test1.length).to.equal(1)
+    expect(test1[0].name).to.equal('Huntingdale')
+
+    let test2 = await coll.findDocuments({
+      bays: {
+        $elemMatch: {
+          mode: 'metro',
+          stopGTFSID: '123'
+        }
+      }
+    }).toArray()
+
+    expect(test2.length).to.equal(1)
+    expect(test2[0].name).to.equal('Huntingdale')
+    expect(test2[0]).to.equal(test1[0])
   })
 
   it('Should ensure $elemMatch respects $in/$gte/other checks', async () => {
