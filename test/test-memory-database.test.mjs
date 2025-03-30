@@ -261,9 +261,10 @@ describe('The in memory database', () => {
       }
     }).toArray()
 
-    expect(test2.length).to.equal(1)
+    expect(test2.length).to.equal(2)
     expect(test2[0].name).to.equal('Huntingdale')
     expect(test2[0]).to.equal(test1[0])
+    expect(test2[1].name).to.equal('Huntingdale 2')
   })
 
   it('Should ensure $elemMatch respects $in/$gte/other checks', async () => {
