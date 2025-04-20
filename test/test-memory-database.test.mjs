@@ -409,6 +409,56 @@ describe('The in memory database', () => {
     expect((await coll.findDocument({ id: 5 })).name).to.equal('Test 2')
   })
 
+  it('Should allow bulk replacements with/without upsert', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+    let coll = await db.createCollection('test-coll')
+
+    await coll.bulkWrite([{ replaceOne: {
+      filter: { name: 'Bye' },
+      replacement: { name: 'Hi' }
+    }}])
+
+    expect(await coll.findDocument({ name: 'Hi' })).to.not.exist
+
+    await coll.bulkWrite([{ replaceOne: {
+      filter: { name: 'Bye' },
+      replacement: { name: 'Hi' },
+      upsert: true
+    }}])
+
+    expect(await coll.findDocument({ name: 'Hi' })).to.exist
+  })  
+
+  it('Should allow bulk replacements', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+    let coll = await db.createCollection('test-coll')
+
+    for (let i = 0; i < 5; i++) {
+      await coll.createDocument({
+        mode: 'bus',
+        stopName: "Dole Avenue/Cheddar Road",
+        id: i
+      })  
+    }
+
+    await coll.bulkWrite([{ replaceOne: {
+      filter: { id: 0 },
+      replacement: { replacement: '1' },
+      upsert: true
+    }}, { replaceOne: {
+      filter: { id: 1 },
+      replacement: { name: 'Hi' },
+      upsert: true
+    }}])
+
+    expect(await coll.findDocument({ replacement: '1' })).to.exist
+    expect(await coll.findDocument({ name: 'Hi' })).to.exist
+
+    expect(await coll.findDocument({ id: 0 })).to.not.exist
+    expect(await coll.findDocument({ id: 1 })).to.not.exist
+    expect(await coll.findDocument({ id: 2 })).to.exist
+  })
+
   it('Should count by using find and returning the length', async () => {
     let db = new LokiDatabaseConnection('test-db')
 
