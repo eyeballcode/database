@@ -156,6 +156,38 @@ describe('The in memory database', () => {
     expect(coll.findDocument({ stopName: "Dole Avenue/Cheddar Road" }).mode).to.equal('tram')
   })
 
+  it('Allow updating multiple documents at once', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocuments([{
+      mode: 'bus',
+      stopName: "Dole Avenue/Cheddar Road",
+      updateMe: 1
+    }, {
+      mode: 'bus',
+      stopName: "Huntingdale Station",
+      updateMe: 1
+    }, {
+      mode: 'bus',
+      stopName: "Oakleigh Station"
+    }, {
+      mode: 'metro',
+      stopName: "Nunawading Station"
+    }])
+
+    await coll.updateDocuments({
+      updateMe: 1
+    }, {
+      $set: { mode: 'tram' }
+    })
+
+    expect(coll.findDocument({ stopName: "Dole Avenue/Cheddar Road" }).mode).to.equal('tram')
+    expect(coll.findDocument({ stopName: "Huntingdale Station" }).mode).to.equal('tram')
+    expect(coll.findDocument({ stopName: "Oakleigh Station" }).mode).to.equal('bus')
+    expect(coll.findDocument({ stopName: "Nunawading Station" }).mode).to.equal('metro')
+  })
+
   it('Allow mongodb style aggregation with a very simple 2 stage pipeline only', async () => {
     let db = new LokiDatabaseConnection('test-db')
 
