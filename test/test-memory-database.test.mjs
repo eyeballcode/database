@@ -512,6 +512,14 @@ describe('The in memory database', () => {
       expect(LokiDatabaseCollection._fieldMatches(13, { $lte: 13 })).to.be.true
     })
 
+    it('Should check for $not', () => {
+      expect(LokiDatabaseCollection._fieldMatches(15, { $not: { $lt: 13 } })).to.be.true
+      expect(LokiDatabaseCollection._fieldMatches(10, { $not: { $lt: 13 } })).to.be.false
+
+      expect(LokiDatabaseCollection._fieldMatches('abc', { $not: { $in: ['abc', 'def'] } })).to.be.false
+      expect(LokiDatabaseCollection._fieldMatches('abcd', { $not: { $in: ['abc', 'def'] } })).to.be.true
+    })
+
     it('Should allow chaining multiple operators', () => {
       expect(LokiDatabaseCollection._fieldMatches(15, { $gte: 13, $lte: 17 })).to.be.true
       expect(LokiDatabaseCollection._fieldMatches(20, { $gte: 13, $lte: 17 })).to.be.false
