@@ -552,6 +552,14 @@ describe('The in memory database', () => {
       expect(LokiDatabaseCollection._fieldMatches('abcd', { $not: { $in: ['abc', 'def'] } })).to.be.true
     })
 
+    it('Should check for $exists', () => {
+      expect(LokiDatabaseCollection._fieldMatches(1, { $exists: true })).to.be.true
+      expect(LokiDatabaseCollection._fieldMatches(undefined, { $exists: true })).to.be.false
+
+      expect(LokiDatabaseCollection._fieldMatches(1, { $exists: false })).to.be.false
+      expect(LokiDatabaseCollection._fieldMatches(undefined, { $exists: false })).to.be.true
+    })
+
     it('Should allow chaining multiple operators', () => {
       expect(LokiDatabaseCollection._fieldMatches(15, { $gte: 13, $lte: 17 })).to.be.true
       expect(LokiDatabaseCollection._fieldMatches(20, { $gte: 13, $lte: 17 })).to.be.false
