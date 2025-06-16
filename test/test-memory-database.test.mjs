@@ -522,12 +522,12 @@ describe('The in memory database', () => {
     await coll.createDocuments(days.map(day => ({ day })))
 
     expect(await coll.countDocuments({
-      $or: [{
-        day: 'Mon'
-      }, {
-        day: 'Tue'
-      }]
+      $or: [{ day: 'Mon' }, { day: 'Tue' }]
     })).to.equal(2)
+
+    expect(await coll.countDocuments({
+      $or: [{ day: 'ABC' }, { day: 'DEF' }]
+    })).to.equal(0)
   })
 
   describe('The _fieldMatches function', () => {
