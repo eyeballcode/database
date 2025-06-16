@@ -514,6 +514,22 @@ describe('The in memory database', () => {
     expect(await coll.findDocument({ days: 'Mon' })).to.exist
   })
 
+  it('Should match allow matching using $or', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    let days = ['Mon', 'Tue', 'Wed', 'Thu']
+    await coll.createDocuments(days.map(day => ({ day })))
+
+    expect(await coll.countDocuments({
+      $or: [{
+        day: 'Mon'
+      }, {
+        day: 'Tue'
+      }]
+    })).to.equal(2)
+  })
+
   describe('The _fieldMatches function', () => {
     it('Should return a trivial comparison if no $ operators are given', () => {
       expect(LokiDatabaseCollection._fieldMatches('51587', '51587')).to.be.true
