@@ -530,6 +530,71 @@ describe('The in memory database', () => {
     })).to.equal(0)
   })
 
+  it('Should match allow matching using $or inside $elemMatch', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocuments([{
+      name: 'Huntingdale',
+      bays: [{
+        mode: 'bus',
+        stopGTFSID: '51586',
+      }, {
+        mode: 'metro',
+        stopGTFSID: '122'
+      }]
+    }, {
+      name: 'Huntingdale 2',
+      bays: [{
+        mode: 'bus',
+        stopGTFSID: '51587',
+      }, {
+        mode: 'metro',
+        stopGTFSID: '123'
+      }]
+    }, {
+      name: 'Monash',
+      bays: [{
+        mode: 'bus',
+        stopGTFSID: '19810'
+      }]
+    }])
+
+    let test1 = await coll.findDocuments({
+      bays: {
+        $elemMatch: {
+          mode: 'bus',
+          $or: [{
+            stopGTFSID: '51587'
+          }, {
+            stopGTFSID: '51586'
+          }]
+        }
+      }
+    }).toArray()
+
+    expect(test1.length).to.equal(2)
+    expect(test1[0].name).to.equal('Huntingdale')
+    expect(test1[1].name).to.equal('Huntingdale 2')
+
+    let test2 = await coll.findDocuments({
+      bays: {
+        $elemMatch: {
+          $or: [{
+            mode: 'metro',
+            stopGTFSID: '123'
+          }, {
+            stopGTFSID: '19810'
+          }]
+        }
+      }
+    }).toArray()
+
+    expect(test2.length).to.equal(2)
+    expect(test2[0].name).to.equal('Huntingdale 2')
+    expect(test2[1].name).to.equal('Monash')
+  })
+
   describe('The _fieldMatches function', () => {
     it('Should return a trivial comparison if no $ operators are given', () => {
       expect(LokiDatabaseCollection._fieldMatches('51587', '51587')).to.be.true
