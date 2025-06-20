@@ -40,6 +40,14 @@ describe('The in memory database', () => {
     expect((await coll.findDocument({ a: 2 })).b).to.equal(2)
   })
 
+  it('Should create a collection if it does not exist', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.getCollection('test-coll')
+    await coll.createDocument({ hi: '1' })
+    expect(await coll.findDocument({ hi: '1' })).to.exist
+  })
+
   it('Should transform geospatial queries using $where and turf', async () => {
     let db = new LokiDatabaseConnection('test-db')
 
