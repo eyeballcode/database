@@ -522,7 +522,7 @@ describe('The in memory database', () => {
     expect(await coll.findDocument({ days: 'Mon' })).to.exist
   })
 
-  it('Should match allow matching using $or', async () => {
+  it('Should allow matching using $or', async () => {
     let db = new LokiDatabaseConnection('test-db')
 
     let coll = await db.createCollection('test-coll')
@@ -535,6 +535,22 @@ describe('The in memory database', () => {
 
     expect(await coll.countDocuments({
       $or: [{ day: 'ABC' }, { day: 'DEF' }]
+    })).to.equal(0)
+  })
+
+  it('Should match array contents inside the $or operator', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    let days = ['Mon', 'Tue', 'Wed', 'Thu']
+    await coll.createDocument({ days })
+
+    expect(await coll.countDocuments({
+      $or: [{ days: 'Mon' }, { days: 'Tue' }]
+    })).to.equal(2)
+
+    expect(await coll.countDocuments({
+      $or: [{ days: 'ABC' }, { days: 'DEF' }]
     })).to.equal(0)
   })
 
