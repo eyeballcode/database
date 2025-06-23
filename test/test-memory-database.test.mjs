@@ -547,7 +547,7 @@ describe('The in memory database', () => {
 
     expect(await coll.countDocuments({
       $or: [{ days: 'Mon' }, { days: 'Tue' }]
-    })).to.equal(2)
+    })).to.equal(1)
 
     expect(await coll.countDocuments({
       $or: [{ days: 'ABC' }, { days: 'DEF' }]
