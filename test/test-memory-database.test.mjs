@@ -554,6 +554,22 @@ describe('The in memory database', () => {
     })).to.equal(0)
   })
 
+  it('Should match array an entire array if given as a target', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    let days = ['Mon', 'Tue', 'Wed', 'Thu']
+    await coll.createDocument({ days })
+
+    expect(await coll.countDocuments({
+      days: ['Mon', 'Tue', 'Wed', 'Thu']
+    })).to.equal(1)
+
+    expect(await coll.countDocuments({
+      days: ['Thu', 'Mon', 'Tue', 'Wed']
+    })).to.equal(0)
+  })
+
   it('Should match allow matching using $or inside $elemMatch', async () => {
     let db = new LokiDatabaseConnection('test-db')
 
