@@ -36,14 +36,13 @@ if (connected) {
       expect((await coll.findDocument({ id: 2 })).status).to.equal('not ok')
     })
     
-    it.only('Should trigger the callback if a query has a high document examined to returned ratio while in debug mode', async () => {
+    it('Should trigger the callback if a query has a high document examined to returned ratio while in debug mode', async () => {
       let called = false
       database.enableDebugging(() => {
         called = true
       })
       let coll = await database.getCollection('test2')
       for (let i = 0; i < 50; i++) await coll.createDocument({ id: i })
-      console.log('here')
       await coll.findDocument({ id: 42 })
       expect(called).to.be.true
     })
