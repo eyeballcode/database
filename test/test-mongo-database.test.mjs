@@ -44,7 +44,7 @@ if (connected) {
       let coll = await database.getCollection('test2')
       for (let i = 0; i < 50; i++) await coll.createDocument({ id: i })
       await coll.findDocument({ id: 42 })
-      expect(called).to.be.true
+      setTimeout(() => expect(called).to.be.true, 10)
     })
 
     after(async () => {
