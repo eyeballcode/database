@@ -27,8 +27,6 @@ if (connected) {
       await database.dropDatabase()
     })
 
-
-    
     it('Insertion/Retrival check', async () => {
       let coll = await database.getCollection('test1')
       await coll.createDocuments([{ id: 1, status: 'ok' }, { id: 2, status: 'not ok' }, { id: 3, status: 'ok' }])
@@ -45,6 +43,14 @@ if (connected) {
       for (let i = 0; i < 50; i++) await coll.createDocument({ id: i })
       await coll.findDocument({ id: 42 })
       setTimeout(() => expect(called).to.be.true, 10)
+    })
+
+    describe('The getCollectionNames function', () => {
+      it('Returns all the collection names in the database', async () => {
+        let collectionNames = await database.getCollectionNames()
+        expect(collectionNames).to.include('test1')
+        expect(collectionNames).to.include('test2')
+      })
     })
 
     after(async () => {

@@ -691,4 +691,16 @@ describe('The in memory database', () => {
       expect(LokiDatabaseCollection._fieldMatches([19, 21], 20)).to.be.false
     })
   })
+
+  describe('The getCollectionNames function', () => {
+    it('Returns all the collection names in the database', async () => {
+      let db = new LokiDatabaseConnection('test-db')
+      await db.createCollection('test1')
+      await db.createCollection('test2')
+
+      let collectionNames = await db.getCollectionNames()
+      expect(collectionNames).to.include('test1')
+      expect(collectionNames).to.include('test2')
+    })
+  })
 })
