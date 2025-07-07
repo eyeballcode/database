@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import MongoDatabaseConnection from '../lib/mongo/MongoDatabaseConnection.mjs'
+import LokiDatabaseConnection from '../lib/loki/LokiDatabaseConnection.mjs'
 
 const serverHost = '127.0.0.1', serverPort = '27017'
 
@@ -65,6 +66,23 @@ if (connected) {
         expect(collectionNames).to.include('test1')
         expect(collectionNames).to.include('test2')
       })
+    })
+
+    it('Can dump a set of collections to a Loki database', async () => {
+      let target = new LokiDatabaseConnection('out-db')
+      await target.connect()
+
+      await database.dumpToLoki(target, ['test1', 'test2'])
+
+      let coll1 = await database.getCollection('test1')
+      let coll1Loki = await target.getCollection('test1')
+      expect((await coll1Loki.findDocument({ id: 1 })).status).to.equal('ok')
+      expect((await coll1Loki.findDocument({ id: 1 }))._id).to.equal((await coll1.findDocument({ id: 1 }))._id.toString())
+      expect((await coll1Loki.findDocument({ id: 2 })).status).to.equal('not ok')
+      expect((await coll1Loki.findDocument({ id: 3 })).status).to.equal('ok')
+
+      let coll2 = await target.getCollection('test2')
+      expect(await coll2.countDocuments()).to.equal(50)
     })
 
     after(async () => {
