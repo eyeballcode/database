@@ -38,6 +38,20 @@ if (connected) {
       expect((await coll.findDocument({ id: 1 })).status).to.equal('ok')
       expect((await coll.findDocument({ id: 2 })).status).to.equal('not ok')
     })
+
+    it('Projects away unwanted fields', async () => {
+      let coll = await database.getCollection('test1')
+
+      expect((await coll.findDocument({ id: 1 }, { status: 0 })).status).to.not.exist
+      expect((await coll.findDocuments({ id: 1 }, { status: 0 }).toArray())[0].status).to.not.exist
+    })
+    
+    it('Insertion/Retrival check', async () => {
+      let coll = await database.getCollection('test1')
+      await coll.createDocuments([{ id: 1, status: 'ok' }, { id: 2, status: 'not ok' }, { id: 3, status: 'ok' }])
+      expect((await coll.findDocument({ id: 1 })).status).to.equal('ok')
+      expect((await coll.findDocument({ id: 2 })).status).to.equal('not ok')
+    })
     
     it('Should trigger the callback if a query has a high document examined to returned ratio while in debug mode', async () => {
       let called = false
