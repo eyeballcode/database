@@ -27,6 +27,10 @@ if (connected) {
       await database.dropDatabase()
     })
 
+    it('Ping check', async () => {
+      await database.ping()
+    })
+
     it('Insertion/Retrival check', async () => {
       let coll = await database.getCollection('test1')
       await coll.createDocuments([{ id: 1, status: 'ok' }, { id: 2, status: 'not ok' }, { id: 3, status: 'ok' }])
