@@ -703,4 +703,16 @@ describe('The in memory database', () => {
       expect(collectionNames).to.include('test2')
     })
   })
+
+  it('Can search an object by its ObjectID without explicitly creating an ID', async () => {
+    let database = new LokiDatabaseConnection('test-db')
+    let coll = await database.getCollection('test3')
+
+    let objID = (await coll.createDocument({ test: 'hi' })).insertedId
+    let queryObj = await coll.findDocument({ _id: coll.createObjectID(objID) })
+    expect(queryObj.test).to.equal('hi')
+
+    let queryObj2 = await coll.findDocument({ _id: coll.createObjectID(objID.toString()) })
+    expect(queryObj2.test).to.equal('hi')
+  })
 })
