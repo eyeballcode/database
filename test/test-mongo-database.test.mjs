@@ -76,7 +76,16 @@ if (connected) {
       let target = new LokiDatabaseConnection('out-db')
       await target.connect()
 
-      await database.dumpToLoki(target, ['test1', 'test2', 'test4'])
+      await database.dumpToLoki(target, [{
+        name: 'test1',
+        query: {}
+      }, {
+        name: 'test2',
+        query: { id: { $lte: 9 } }
+      }, {
+        name: 'test4',
+        query: {}
+      }])
 
       let coll1 = await database.getCollection('test1')
       let coll1Loki = await target.getCollection('test1')
@@ -86,7 +95,7 @@ if (connected) {
       expect((await coll1Loki.findDocument({ id: 3 })).status).to.equal('ok')
 
       let coll2 = await target.getCollection('test2')
-      expect(await coll2.countDocuments()).to.equal(50)
+      expect(await coll2.countDocuments()).to.equal(10)
 
       let coll4 = await target.getCollection('test4')
       expect((await coll4.findDocument({ test: 'ok' })).name).to.equal(testObjID.toString())
