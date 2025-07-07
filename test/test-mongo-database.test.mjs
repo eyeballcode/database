@@ -71,20 +71,23 @@ if (connected) {
     it('Can dump a set of collections to a Loki database', async () => {
       let coll = await database.getCollection('test4')
       let testObjID = (await coll.createDocument({ foo: 'bar' })).insertedId
-      await coll.createDocument({ test: 'ok', name: testObjID })
+      await coll.createDocument({ test: 'ok', name: testObjID, discard: 'me' })
 
       let target = new LokiDatabaseConnection('out-db')
       await target.connect()
 
       await database.dumpToLoki(target, [{
         name: 'test1',
-        query: {}
+        query: {},
       }, {
         name: 'test2',
         query: { id: { $lte: 9 } }
       }, {
         name: 'test4',
-        query: {}
+        query: {},
+        projection: {
+          discard: 0
+        }
       }])
 
       let coll1 = await database.getCollection('test1')
@@ -99,6 +102,7 @@ if (connected) {
 
       let coll4 = await target.getCollection('test4')
       expect((await coll4.findDocument({ test: 'ok' })).name).to.equal(testObjID.toString())
+      expect((await coll4.findDocument({ test: 'ok' })).discard).to.not.exist
     })
 
     after(async () => {
