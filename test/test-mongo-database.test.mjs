@@ -48,6 +48,16 @@ if (connected) {
       await coll.findDocument({ id: 42 })
       setTimeout(() => expect(called).to.be.true, 10)
     })
+    
+    it('Can search an object by its ObjectID without explicitly creating an ID', async () => {
+      let coll = await database.getCollection('test3')
+      let objID = (await coll.createDocument({ test: 'hi' })).insertedId
+      let queryObj = await coll.findDocument({ _id: coll.createObjectID(objID) })
+      expect(queryObj.test).to.equal('hi')
+
+      let queryObj2 = await coll.findDocument({ _id: coll.createObjectID(objID.toString()) })
+      expect(queryObj2.test).to.equal('hi')
+    })
 
     describe('The getCollectionNames function', () => {
       it('Returns all the collection names in the database', async () => {
