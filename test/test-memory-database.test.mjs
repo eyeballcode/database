@@ -715,4 +715,28 @@ describe('The in memory database', () => {
     let queryObj2 = await coll.findDocument({ _id: coll.createObjectID(objID.toString()) })
     expect(queryObj2.test).to.equal('hi')
   })
+
+  it('Copies a document from one collection to another without issues using replaceDocument', async () => {
+    let database = new LokiDatabaseConnection('test-db')
+    let coll1 = await database.getCollection('test1')
+    let coll2 = await database.getCollection('test2')
+
+    await coll1.createDocument({ test: 'hi' })
+    let data = await coll1.findDocument({})
+    await coll2.replaceDocument({}, data, true)
+    let data2 = await coll2.findDocument({})
+    expect(data2.test).to.equal('hi')
+  })
+
+  it('Copies a document from one collection to another without issues using createDocument', async () => {
+    let database = new LokiDatabaseConnection('test-db')
+    let coll1 = await database.getCollection('test1')
+    let coll2 = await database.getCollection('test2')
+
+    await coll1.createDocument({ test: 'hi' })
+    let data = await coll1.findDocument({})
+    await coll2.createDocument(data)
+    let data2 = await coll2.findDocument({})
+    expect(data2.test).to.equal('hi')
+  })
 })
