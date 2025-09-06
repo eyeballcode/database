@@ -739,4 +739,45 @@ describe('The in memory database', () => {
     let data2 = await coll2.findDocument({})
     expect(data2.test).to.equal('hi')
   })
+
+  it('Supports $and with $elemMatch', async () => {
+    let database = new LokiDatabaseConnection('test-db')
+    let coll1 = await database.getCollection('test-coll')
+    coll1.createDocument({
+      mode: 'regional train',
+      operationDays: '20250905',
+      runID: '8457',
+      stopTimings: [{
+        stopName: 'East Pakenham Railway Station', departureTime: '00:32'
+      },
+      {
+        stopName: 'Traralgon Railway Station', arrivalTime: '01:46'
+      }]
+    })
+
+    const query = {
+      mode: 'regional train',
+      operationDays: '20250905',
+      $and: [{
+        stopTimings: {
+          $elemMatch: {
+            stopName: 'Southern Cross Railway Station',
+            departureTime: { $in: ['22:59'] },
+          }
+        }
+      }, {
+        stopTimings: {
+          $elemMatch: {
+            stopName: 'Traralgon Railway Station',
+            arrivalTime: { $in: ['01:15'] },
+          }
+        }
+      }]
+    }
+
+    let test0 = await coll1.findDocument(query)
+    let test1 = await coll1.findDocument(query)
+    expect(test0).to.not.exist
+    expect(test1).to.not.exist
+  })
 })
