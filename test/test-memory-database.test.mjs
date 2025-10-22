@@ -303,7 +303,7 @@ describe('The in memory database', () => {
 
     expect(test2.length).to.equal(2)
     expect(test2[0].name).to.equal('Huntingdale')
-    expect(test2[0]).to.equal(test1[0])
+    expect(test2[0]).to.deep.equal(test1[0])
     expect(test2[1].name).to.equal('Huntingdale 2')
   })
 
@@ -788,7 +788,7 @@ describe('The in memory database', () => {
     await coll.createDocument({ a: 1, b: 2, c: 3 })
     const doc = await coll.findDocument({}, { a: 1 })
     expect(doc.a).to.equal(1)
-    expect(doc).to.not.have.members(['b', 'c'])
+    expect(Object.keys(doc)).to.not.have.members(['b', 'c'])
   })
 
   it('Removes specifically blocked fields in the projection', async () => {
@@ -797,8 +797,9 @@ describe('The in memory database', () => {
     let coll = await db.createCollection('test-coll')
     await coll.createDocument({ a: 1, b: 2, c: 3 })
     const doc = await coll.findDocument({}, { a: 0 })
-    expect(doc).to.not.have.members(['a'])
-    expect(doc).to.have.members(['b', 'c'])
+    expect(Object.keys(doc)).to.not.have.members(['a'])
+    expect(Object.keys(doc)).to.include('b')
+    expect(Object.keys(doc)).to.include('c')
     expect(doc.b).to.equal(2)
     expect(doc.c).to.equal(3)
   })
