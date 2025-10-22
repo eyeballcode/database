@@ -780,4 +780,26 @@ describe('The in memory database', () => {
     expect(test0).to.not.exist
     expect(test1).to.not.exist
   })
+
+  it('Returns only selected fields in the projection', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocument({ a: 1, b: 2, c: 3 })
+    const doc = await coll.findDocument({}, { a: 1 })
+    expect(doc.a).to.equal(1)
+    expect(doc).to.not.have.members(['b', 'c'])
+  })
+
+  it('Removes specifically blocked fields in the projection', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocument({ a: 1, b: 2, c: 3 })
+    const doc = await coll.findDocument({}, { a: 0 })
+    expect(doc).to.not.have.members(['a'])
+    expect(doc).to.have.members(['b', 'c'])
+    expect(doc.b).to.equal(2)
+    expect(doc.c).to.equal(3)
+  })
 })
