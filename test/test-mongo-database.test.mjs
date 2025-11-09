@@ -74,6 +74,22 @@ if (connected) {
       expect(queryObj2.test).to.equal('hi')
     })
 
+    it('Aggregates data', async () => {
+      const coll = await database.getCollection('agg-coll')
+      for (let i = 0; i < 20; i++) await coll.createDocument({ i })
+      await coll.createDocument({ i: 2 })
+      const results = (await coll.aggregate([{
+        $match: {
+          i: { $lte: 5 }
+        }
+      }, {
+        $group: { _id: '$i', count: { $sum: 1 } }
+      }]).toArray()).sort((a, b) => a._id - b._id)
+
+      expect(results.length).to.equal(6)
+      expect(results[2].count).to.equal(2)
+    })
+
     describe('The getCollectionNames function', () => {
       it('Returns all the collection names in the database', async () => {
         let collectionNames = await database.getCollectionNames()
