@@ -123,5 +123,37 @@ if (connected) {
       await database.dropDatabase()
       await database.close()
     })
+
+    describe('The batchQuery function', () => {
+      it('Returns all documents matching a query in batches', async () => {
+        const coll = await database.getCollection('batch-test-1')
+        await coll.createDocument({ n: 1 })
+        await coll.createDocument({ n: 2 })
+        await coll.createDocument({ n: 3 })
+
+        let seen = []
+        await coll.batchQuery({}, 1, async data => {
+          expect(data.length).to.equal(1)
+          seen.push(...data)
+        })
+        expect(seen.map(({n}) => n)).to.deep.equal([1, 2, 3])
+      })
+
+      it('Handles the case where the last batch is not full', async () => {
+        const coll = await database.getCollection('batch-test-2')
+        await coll.createDocument({ n: 1 })
+        await coll.createDocument({ n: 2 })
+        await coll.createDocument({ n: 3 })
+
+        let seen = []
+        await coll.batchQuery({}, 2, async (data, i) => {
+          if (i === 0) expect(data.length).to.equal(2)
+          else expect(data.length).to.equal(1)
+
+          seen.push(...data)
+        })
+        expect(seen.map(({n}) => n)).to.deep.equal([1, 2, 3])
+      })
+    })
   })
 }
