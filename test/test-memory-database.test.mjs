@@ -522,6 +522,21 @@ describe('The in memory database', () => {
     expect(await coll.findDocument({ days: 'Mon' })).to.exist
   })
 
+  it('Should match arrays by their contents when using $in', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocument({ days: [ 'Mon', 'Tue' ] })
+    await coll.createDocument({ days: [ 'Mon', 'Thu' ] })
+    await coll.createDocument({ days: [ 'Wed', 'Thu' ] })
+
+    const matching = await coll.findDocuments({ days: {
+      $in: [ 'Mon', 'Tue']
+    } }).toArray()
+
+    expect(matching.length).to.equal(2)
+  })
+
   it('Should allow matching using $or', async () => {
     let db = new LokiDatabaseConnection('test-db')
 
