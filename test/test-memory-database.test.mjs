@@ -818,4 +818,18 @@ describe('The in memory database', () => {
     expect(doc.b).to.equal(2)
     expect(doc.c).to.equal(3)
   })
+
+  it('Allows MongoDB style sorting of documents with a cursor', async () => {
+    const db = new LokiDatabaseConnection('test-db')
+
+    const coll = await db.createCollection('test-coll')
+    await coll.createDocument({ n: 3 })
+    await coll.createDocument({ n: 2 })
+    await coll.createDocument({ n: 1 })
+
+    const docs = await coll.findDocuments({}).sort({ n: 1 }).toArray()
+    expect(docs[0].n).to.equal(1)
+    expect(docs[1].n).to.equal(2)
+    expect(docs[2].n).to.equal(3)
+  })
 })
