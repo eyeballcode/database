@@ -832,4 +832,44 @@ describe('The in memory database', () => {
     expect(docs[1].n).to.equal(2)
     expect(docs[2].n).to.equal(3)
   })
+
+  it('Allows MongoDB style sorting with multiple fields and directions', async () => {
+    const db = new LokiDatabaseConnection('test-db')
+
+    const coll = await db.createCollection('test-coll')
+    await coll.createDocument({ n: 3, m: 0 })
+    await coll.createDocument({ n: 2, m: 3 })
+    await coll.createDocument({ n: 2, m: 1 })
+    await coll.createDocument({ n: 2, m: 2 })
+    await coll.createDocument({ n: 1, m: -1 })
+
+    const docs = await coll.findDocuments({}).sort({ n: 1, m: -1 }).toArray()
+    console.log(docs)
+    expect(docs[0].n).to.equal(1)
+
+    expect(docs[1].n).to.equal(2)
+    expect(docs[2].n).to.equal(2)
+    expect(docs[3].n).to.equal(2)
+
+    expect(docs[1].m).to.equal(3)
+    expect(docs[2].m).to.equal(2)
+    expect(docs[3].m).to.equal(1)
+
+    expect(docs[4].n).to.equal(3)
+  })
+
+  it('Allows MongoDB style of chaining cursor commands', async () => {
+    const db = new LokiDatabaseConnection('test-db')
+
+    const coll = await db.createCollection('test-coll')
+    await coll.createDocument({ n: 3 })
+    await coll.createDocument({ n: 2 })
+    await coll.createDocument({ n: 1 })
+
+    const cursor = coll.findDocuments({}).sort({ n: 1 })
+    expect((await cursor.next()).n).to.equal(1)
+    expect((await cursor.next()).n).to.equal(2)
+    expect((await cursor.next()).n).to.equal(3)
+  })
+
 })
