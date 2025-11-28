@@ -137,6 +137,33 @@ describe('The in memory database', () => {
     expect(await coll.distinct('_id').length).to.equal(4)
   })
 
+  it('Collapses arrays when finding distinct items', async () => {
+    let db = new LokiDatabaseConnection('test-db')
+
+    let coll = await db.createCollection('test-coll')
+    await coll.createDocuments([{
+      mode: 'bus',
+      stopName: [ "Dole Avenue/Cheddar Road", "Huntingdale Station" ]
+    }, {
+      mode: 'bus',
+      stopName: "Huntingdale Station"
+    }, {
+      mode: 'bus',
+      stopName: "Oakleigh Station"
+    }, {
+      mode: 'metro',
+      stopName: [ "Nunawading Station", "Oakleigh Station" ]
+    }])
+
+    expect(await coll.distinct('stopName', { mode: 'bus' })).to.have.members([
+      'Dole Avenue/Cheddar Road',
+      'Huntingdale Station',
+      'Oakleigh Station'
+    ])
+
+    expect(await coll.distinct('_id').length).to.equal(4)
+  })
+
   it('Allow mongodb style updating', async () => {
     let db = new LokiDatabaseConnection('test-db')
 
